@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlops-major-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mlops-major
+  template:
+    metadata:
+      labels:
+        app: mlops-major
+    spec:
+      containers:
+        - name: mlops-major
+          image: your-dockerhub-username/mlops-major:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PORT
+              value: "5000"
+
