@@ -1,43 +1,42 @@
-from __future__ import annotations
+"""
+train.py
+--------
 
-import argparse
-import json
+Script to:
+- load the Olivetti faces dataset
+- create a 70/30 train/test split
+- train a DecisionTreeClassifier
+- save the trained model to ``saved_model.pth``
+"""
 
-from mlops_major.data import load_dataset
-from mlops_major.model_utils import TrainingConfig, train_and_save
+from mlops_major.model_utils import (
+    MODEL_PATH,
+    evaluate_model,
+    save_model,
+    train_model,
+)
+from mlops_major.preprocess import get_train_test_split
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train DecisionTree on Olivetti faces.")
-    parser.add_argument("--max-depth", type=int, default=None, help="Max depth for tree")
-    parser.add_argument(
-        "--min-samples-leaf",
-        type=int,
-        default=1,
-        help="Minimum samples per leaf node",
+def main():
+    X_train, X_test, y_train, y_test = get_train_test_split(
+        test_size=0.3,
+        random_state=42,
     )
-    parser.add_argument(
-        "--random-state",
-        type=int,
-        default=42,
-        help="Random state for reproducible results",
+    model = train_model(
+        X_train,
+        y_train,
+        random_state=42,
     )
-    return parser.parse_args()
+    save_model(model, MODEL_PATH)
 
-
-def main() -> None:
-    args = parse_args()
-    dataset = load_dataset()
-    config = TrainingConfig(
-        max_depth=args.max_depth,
-        min_samples_leaf=args.min_samples_leaf,
-        random_state=args.random_state,
-    )
-    metadata = train_and_save(dataset, config=config)
-    print("Training completed. Metadata:")
-    print(json.dumps(metadata, indent=2))
+    # Optional: print accuracy here as well for quick feedback
+    accuracy = evaluate_model(model, X_test, y_test)
+    print(f"Training completed. Test accuracy: {accuracy:.4f}")
+    print(f"Model saved to: {MODEL_PATH.resolve()}")
 
 
 if __name__ == "__main__":
     main()
+
 

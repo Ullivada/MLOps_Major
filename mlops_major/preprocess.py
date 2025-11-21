@@ -1,20 +1,34 @@
-from __future__ import annotations
+from sklearn.model_selection import train_test_split
 
-import io
-from typing import Tuple
-
-import numpy as np
-from PIL import Image
+from .data import get_dataset
 
 
-IMAGE_SIZE: Tuple[int, int] = (64, 64)
+def get_train_test_split(test_size: float = 0.3, random_state: int = 42):
+    """
+    Prepare a train/test split of the Olivetti faces dataset.
+
+    Parameters
+    ----------
+    test_size : float, default=0.3
+        Proportion of the dataset to include in the test split.
+    random_state : int, default=42
+        Random seed to make the split reproducible across scripts.
+
+    Returns
+    -------
+    X_train, X_test, y_train, y_test : arrays
+        Train/test split of features and targets.
+    """
+    X, y = get_dataset()
+    return train_test_split(
+        X,
+        y,
+        test_size=test_size,
+        random_state=random_state,
+        stratify=y,
+    )
 
 
-def image_bytes_to_vector(data: bytes) -> np.ndarray:
-    """Convert uploaded image bytes to the flattened vector expected by the model."""
-    with Image.open(io.BytesIO(data)) as img:
-        img = img.convert("L")
-        img = img.resize(IMAGE_SIZE)
-        array = np.asarray(img, dtype=np.float32) / 255.0
-        return array.flatten()
+__all__ = ["get_train_test_split"]
+
 
